@@ -4,10 +4,18 @@ import os
 # --- CORRECTION SPÉCIFIQUE MACOS (COCOA PLUGIN) ---
 # Ne s'applique que si l'application tourne sur un Mac, sans perturber Windows/Linux
 if sys.platform == "darwin":
-    import PyQt6
-    qt_plugin_path = os.path.join(os.path.dirname(PyQt6.__file__), "Qt6", "plugins")
-    if os.path.exists(qt_plugin_path):
-        os.environ["QT_PLUGIN_PATH"] = qt_plugin_path
+    try:
+        import PyQt6
+        pyqt_dir = os.path.dirname(PyQt6.__file__)
+        # Recherche dynamique du dossier "platforms" contenant libqcocoa.dylib
+        for root, dirs, files in os.walk(pyqt_dir):
+            if "platforms" in dirs:
+                platforms_path = os.path.join(root, "platforms")
+                if os.path.exists(os.path.join(platforms_path, "libqcocoa.dylib")):
+                    os.environ["QT_QPA_PLATFORM_PLUGIN_PATH"] = platforms_path
+                    break
+    except Exception as e:
+        print(f"Avertissement config Mac Qt : {e}")
 # ---------------------------------------------------
 
 from PyQt6.QtWidgets import QApplication
