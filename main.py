@@ -22,29 +22,6 @@ from database.queries import TresoQueries
 from views.main_window import MainWindow
 from controllers.main_controller import MainController
 
-def initialiser_donnees_test(queries: TresoQueries):
-    """Insère les catégories et tiers de base pour l'association ODIN si elles n'existent pas."""
-    categories_init = [
-        ("Évènements / Soirées", "RECETTE"),
-        ("Subventions", "RECETTE"),
-        ("Ventes Courses (Épicerie)", "RECETTE"),
-        ("Commissions préventes", "RECETTE"),
-        ("Frais bancaires", "DEPENSE"),
-        ("Matériel", "DEPENSE"),
-        ("Courses METRO (Épicerie)", "DEPENSE")
-    ]
-    for nom, type_flux in categories_init:
-        queries.ajouter_categorie(nom, type_flux)
-
-    tiers_init = [
-        ("METRO", "MORAL"),
-        ("BDE", "MORAL"),
-        ("Université Savoie Mont Blanc", "MORAL"),
-        ("Rémy (Membre)", "PHYSIQUE")
-    ]
-    for nom, type_tier in tiers_init:
-        queries.ajouter_tier(nom, type_tier)
-
 def main():
     app = QApplication(sys.argv)
 
@@ -57,9 +34,9 @@ def main():
         print("Attention : Fichier de style (resources/style.qss) introuvable.")
     # -------------------------------------------------
 
+    # Initialisation de la base de données (tables vides)
     db = DBManager()
     queries = TresoQueries(db)
-    initialiser_donnees_test(queries)
 
     view = MainWindow()
     controller = MainController(view, queries)
