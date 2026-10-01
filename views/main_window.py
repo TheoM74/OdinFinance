@@ -104,6 +104,7 @@ class MainWindow(QMainWindow):
         layout_principal.setContentsMargins(20, 20, 20, 20)
         layout_principal.setSpacing(20)
 
+        # 1. Formulaire (Gauche) - On élargit à 420px pour laisser respirer les combobox
         self.form_group = QGroupBox("Enregistrer un flux financier")
         form_layout = QFormLayout(self.form_group)
         form_layout.setSpacing(12)
@@ -124,8 +125,10 @@ class MainWindow(QMainWindow):
         self.ref_input = QLineEdit()
         self.ref_input.setPlaceholderText("N° Facture (Optionnel)")
 
+        # Layout Catégorie [+ / -] avec politique responsive
         cat_layout = QHBoxLayout()
         self.cat_combo = QComboBox()
+        self.cat_combo.setSizeAdjustPolicy(QComboBox.SizeAdjustPolicy.AdjustToContents) # S'adapte au contenu
         self.btn_add_cat = QPushButton("+")
         self.btn_add_cat.setObjectName("btn_icon")
         self.btn_del_cat = QPushButton("−")
@@ -133,8 +136,10 @@ class MainWindow(QMainWindow):
         self.btn_del_cat.setObjectName("btn_icon")
         for w in [self.cat_combo, self.btn_add_cat, self.btn_del_cat]: cat_layout.addWidget(w)
 
+        # Layout Tier [+ / -] avec politique responsive
         tier_layout = QHBoxLayout()
         self.tier_combo = QComboBox()
+        self.tier_combo.setSizeAdjustPolicy(QComboBox.SizeAdjustPolicy.AdjustToContents)
         self.btn_add_tier = QPushButton("+")
         self.btn_add_tier.setObjectName("btn_icon")
         self.btn_del_tier = QPushButton("−")
@@ -161,9 +166,10 @@ class MainWindow(QMainWindow):
         btns_layout.addWidget(self.btn_annuler_edition)
         form_layout.addRow("", btns_layout)
 
-        self.form_group.setFixedWidth(400)
+        self.form_group.setFixedWidth(430) # Élargi pour éviter toute coupe
         layout_principal.addWidget(self.form_group)
 
+        # 2. Tableau (Droite)
         right_layout = QVBoxLayout()
         
         self.table_transactions = QTableWidget()

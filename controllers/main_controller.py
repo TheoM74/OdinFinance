@@ -1,7 +1,7 @@
 from views.main_window import MainWindow
 from database.queries import TresoQueries
 from PyQt6.QtWidgets import QTableWidgetItem, QMessageBox
-from PyQt6.QtCore import QDate
+from PyQt6.QtCore import QDate, Qt
 
 class MainController:
     def __init__(self, view: MainWindow, queries: TresoQueries):
@@ -34,13 +34,19 @@ class MainController:
         self.view.cat_combo.clear()
         self.categories_data = self.queries.get_toutes_categories()
         for cat_id, nom, type_flux in self.categories_data:
-            self.view.cat_combo.addItem(f"{nom} ({type_flux})", cat_id)
+            texte = f"{nom} ({type_flux})"
+            self.view.cat_combo.addItem(texte, cat_id)
+            # Ajout d'une info-bulle sur l'élément de la liste
+            index = self.view.cat_combo.count() - 1
+            self.view.cat_combo.setItemData(index, texte, Qt.ItemDataRole.ToolTipRole)
 
         self.view.tier_combo.clear()
         self.view.tier_combo.addItem("-- Non spécifié --", None)
         self.tiers_data = self.queries.get_tous_tiers()
         for tier_id, nom, type_tier in self.tiers_data:
-            self.view.tier_combo.addItem(f"{nom}", tier_id)
+            self.view.tier_combo.addItem(nom, tier_id)
+            index = self.view.tier_combo.count() - 1
+            self.view.tier_combo.setItemData(index, nom, Qt.ItemDataRole.ToolTipRole)
 
     def charger_filtres_combobox(self):
         """Alimente les listes déroulantes de la barre de filtres."""
@@ -365,3 +371,4 @@ class MainController:
             QMessageBox.information(self.view, "Succès", "Compte de résultat exporté avec succès.")
         except Exception as e:
             QMessageBox.critical(self.view, "Erreur", str(e))
+
