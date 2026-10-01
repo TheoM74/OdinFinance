@@ -58,7 +58,7 @@ jobs:
         if: runner.os == 'macOS'
         run: |
           cd dist
-          zip -r ../OdinFinance-macOS.zip OdinFinance.app
+          zip -y -r ../OdinFinance-macOS.zip OdinFinance.app
 
       - name: Publier les exécutables dans la Release GitHub
         uses: softprops/action-gh-release@v2
