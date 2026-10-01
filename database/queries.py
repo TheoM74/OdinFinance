@@ -6,7 +6,6 @@ class TresoQueries:
 
     # --- CATEGORIES ---
     def ajouter_categorie(self, nom: str, type_flux: str):
-        """Ajoute une nouvelle catégorie (RECETTE ou DEPENSE)."""
         with self.db.get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute(
@@ -16,15 +15,20 @@ class TresoQueries:
             conn.commit()
 
     def get_toutes_categories(self):
-        """Récupère toutes les catégories de la base."""
         with self.db.get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("SELECT id, nom, type_flux FROM categories ORDER BY nom")
             return cursor.fetchall()
 
+    def supprimer_categorie(self, categorie_id: int):
+        """Supprime une catégorie (échouera si des transactions y sont liées grâce aux Foreign Keys)."""
+        with self.db.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("DELETE FROM categories WHERE id = ?", (categorie_id,))
+            conn.commit()
+
     # --- TIERS ---
     def ajouter_tier(self, nom: str, type_tier: str):
-        """Ajoute un tier (PHYSIQUE ou MORAL)."""
         with self.db.get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute(
@@ -34,16 +38,21 @@ class TresoQueries:
             conn.commit()
 
     def get_tous_tiers(self):
-        """Récupère tous les tiers."""
         with self.db.get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("SELECT id, nom, type_tier FROM tiers ORDER BY nom")
             return cursor.fetchall()
 
+    def supprimer_tier(self, tier_id: int):
+        """Supprime un tier."""
+        with self.db.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("DELETE FROM tiers WHERE id = ?", (tier_id,))
+            conn.commit()
+
     # --- TRANSACTIONS ---
     def ajouter_transaction(self, date: str, description: str, montant: float, 
                             ref_facture: str, categorie_id: int, tier_id: int = None):
-        """Enregistre une nouvelle transaction financière."""
         with self.db.get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("""
@@ -52,14 +61,32 @@ class TresoQueries:
             """, (date, description, montant, ref_facture, categorie_id, tier_id))
             conn.commit()
 
+    def modifier_transaction(self, trans_id: int, date: str, description: str, montant: float, 
+                             ref_facture: str, categorie_id: int, tier_id: int = None):
+        """Met à jour une transaction existante."""
+        with self.db.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                UPDATE transactions 
+                SET date_transaction = ?, description = ?, montant = ?, reference_facture = ?, categorie_id = ?, tier_id = ?
+                WHERE id = ?
+            """, (date, description, montant, ref_facture, categorie_id, tier_id, trans_id))
+            conn.commit()
+
+    def supprimer_transaction(self, trans_id: int):
+        """Supprime une transaction par son ID."""
+        with self.db.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("DELETE FROM transactions WHERE id = ?", (trans_id,))
+            conn.commit()
+
     def get_toutes_transactions(self):
-        """Récupère l'historique complet des transactions avec les noms des catégories et tiers (via JOIN)."""
         with self.db.get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("""
                 SELECT t.id, t.date_transaction, t.description, t.montant, t.reference_facture,
                        c.nom AS categorie_nom, c.type_flux,
-                       ti.nom AS tier_nom
+                       ti.nom AS tier_nom, t.categorie_id, t.tier_id
                 FROM transactions t
                 JOIN categories c ON t.categorie_id = c.id
                 LEFT JOIN tiers ti ON t.tier_id = ti.id
@@ -68,7 +95,6 @@ class TresoQueries:
             return cursor.fetchall()
 
     def get_totaux_par_categorie(self):
-        """Calcule la somme des montants par catégorie pour le bilan."""
         with self.db.get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("""
