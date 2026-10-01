@@ -1,0 +1,13 @@
+# Environnement virtuel
+venv/
+
+# Fichiers de cache Python
+__pycache__/
+*.py[cod]
+
+# Base de données locale de test (laisse l'app la recréer vide)
+tresorerie.db
+
+# Fichiers IDE
+.vscode/
+.idea/
