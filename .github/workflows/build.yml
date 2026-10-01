@@ -3,11 +3,14 @@ name: Build Executables
 on:
   push:
     tags:
-      - "v*" # Se déclenche quand tu publies un tag (ex: v1.0.0)
+      - "v*"
+
+permissions:
+  contents: write
 
 jobs:
   build:
-    name: Compiler pour ${{ matrix.os }}
+    name: Compiler pour ${{ matrix.name }}
     runs-on: ${{ matrix.os }}
 
     strategy:
@@ -15,11 +18,9 @@ jobs:
         include:
           - os: windows-latest
             name: Windows
-            executable_ext: .exe
             separator: ";"
           - os: macos-latest
             name: macOS
-            executable_ext: ""
             separator: ":"
 
     steps:
