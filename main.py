@@ -1,4 +1,15 @@
 import sys
+import os
+
+# --- CORRECTION SPÉCIFIQUE MACOS (COCOA PLUGIN) ---
+# Ne s'applique que si l'application tourne sur un Mac, sans perturber Windows/Linux
+if sys.platform == "darwin":
+    import PyQt6
+    qt_plugin_path = os.path.join(os.path.dirname(PyQt6.__file__), "Qt6", "plugins")
+    if os.path.exists(qt_plugin_path):
+        os.environ["QT_PLUGIN_PATH"] = qt_plugin_path
+# ---------------------------------------------------
+
 from PyQt6.QtWidgets import QApplication
 from database.db_manager import DBManager
 from database.queries import TresoQueries
