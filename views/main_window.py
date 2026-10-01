@@ -10,24 +10,25 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("OdinFinance - Trésorerie Officielle")
-        self.resize(1150, 750)
+        self.resize(1200, 750)
 
         self.tabs = QTabWidget()
         self.setCentralWidget(self.tabs)
 
+        # --- ONGLET 1 : COMPTE DE RÉSULTAT (PRINCIPAL) ---
+        self.tab_bilan = QWidget()
+        self.init_tab_bilan()
+        self.tabs.addTab(self.tab_bilan, "📈 Compte de Résultat & Synthèse")
+
+        # --- ONGLET 2 : SAISIE & MOUVEMENTS ---
         self.tab_transactions = QWidget()
         self.init_tab_transactions()
         self.tabs.addTab(self.tab_transactions, "📋 Saisie & Mouvements")
-
-        self.tab_bilan = QWidget()
-        self.init_tab_bilan()
-        self.tabs.addTab(self.tab_bilan, "📈 Compte de Résultat (AG)")
 
     def _creer_champ_avec_erreur(self, widget_saisie):
         layout = QVBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(2)
-        
         layout.addWidget(widget_saisie)
         
         label_erreur = QLabel("")
@@ -39,6 +40,65 @@ class MainWindow(QMainWindow):
         container.setLayout(layout)
         return container, label_erreur
 
+    def init_tab_bilan(self):
+        layout = QVBoxLayout(self.tab_bilan)
+        layout.setContentsMargins(20, 20, 20, 20)
+        layout.setSpacing(15)
+
+        # En-tête
+        header_layout = QHBoxLayout()
+        title = QLabel("Tableau de Bord & Compte de Résultat Officiel")
+        title.setStyleSheet("font-size: 18px; font-weight: bold; color: #1f2937;")
+        
+        self.btn_export_excel = QPushButton("📥 Exporter le Compte de Résultat (AG)")
+        self.btn_export_excel.setObjectName("btn_succes")
+        
+        header_layout.addWidget(title)
+        header_layout.addStretch()
+        header_layout.addWidget(self.btn_export_excel)
+        layout.addLayout(header_layout)
+
+        # --- BARRE DE FILTRES ---
+        filtres_group = QGroupBox("Filtres d'analyse")
+        filtres_layout = QHBoxLayout(filtres_group)
+        filtres_layout.setContentsMargins(15, 15, 15, 15)
+
+        self.filtre_mois_combo = QComboBox()
+        self.filtre_cat_combo = QComboBox()
+        self.filtre_tier_combo = QComboBox()
+        self.btn_reset_filtres = QPushButton("Réinitialiser")
+        self.btn_reset_filtres.setObjectName("btn_secondaire")
+
+        filtres_layout.addWidget(QLabel("Mois :"))
+        filtres_layout.addWidget(self.filtre_mois_combo)
+        filtres_layout.addWidget(QLabel("Catégorie :"))
+        filtres_layout.addWidget(self.filtre_cat_combo)
+        filtres_layout.addWidget(QLabel("Tier :"))
+        filtres_layout.addWidget(self.filtre_tier_combo)
+        filtres_layout.addWidget(self.btn_reset_filtres)
+
+        layout.addWidget(filtres_group)
+
+        # Tableau de synthèse
+        self.table_bilan = QTableWidget()
+        self.table_bilan.setColumnCount(3)
+        self.table_bilan.setHorizontalHeaderLabels(["Catégorie Comptable", "Type de Flux", "Solde Cumulé (€)"])
+        self.table_bilan.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+        self.table_bilan.verticalHeader().setVisible(False)
+        self.table_bilan.setAlternatingRowColors(True)
+        layout.addWidget(self.table_bilan)
+
+        # Bloc Solde
+        solde_widget = QWidget()
+        solde_widget.setStyleSheet("background-color: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 15px;")
+        solde_layout = QHBoxLayout(solde_widget)
+        
+        self.label_solde = QLabel("Solde Actuel : -- €")
+        self.label_solde.setStyleSheet("font-size: 16px; font-weight: bold; color: #166534;")
+        solde_layout.addWidget(self.label_solde, alignment=Qt.AlignmentFlag.AlignCenter)
+        
+        layout.addWidget(solde_widget)
+
     def init_tab_transactions(self):
         layout_principal = QHBoxLayout(self.tab_transactions)
         layout_principal.setContentsMargins(20, 20, 20, 20)
@@ -47,14 +107,14 @@ class MainWindow(QMainWindow):
         self.form_group = QGroupBox("Enregistrer un flux financier")
         form_layout = QFormLayout(self.form_group)
         form_layout.setSpacing(12)
-        form_layout.setContentsMargins(15, 25, 15, 15)
+        form_layout.setContentsMargins(15, 20, 15, 15)
 
         self.date_input = QDateEdit()
         self.date_input.setDate(QDate.currentDate())
         self.date_input.setCalendarPopup(True)
 
         self.desc_input = QLineEdit()
-        self.desc_input.setPlaceholderText("Ex: Achat boissons soirée d'inté")
+        self.desc_input.setPlaceholderText("Ex: Achat boissons soirée")
         desc_container, self.err_desc = self._creer_champ_avec_erreur(self.desc_input)
 
         self.amount_input = QLineEdit()
@@ -62,7 +122,7 @@ class MainWindow(QMainWindow):
         amount_container, self.err_amount = self._creer_champ_avec_erreur(self.amount_input)
 
         self.ref_input = QLineEdit()
-        self.ref_input.setPlaceholderText("N° Facture / Ticket (Optionnel)")
+        self.ref_input.setPlaceholderText("N° Facture (Optionnel)")
 
         cat_layout = QHBoxLayout()
         self.cat_combo = QComboBox()
@@ -101,7 +161,7 @@ class MainWindow(QMainWindow):
         btns_layout.addWidget(self.btn_annuler_edition)
         form_layout.addRow("", btns_layout)
 
-        self.form_group.setFixedWidth(380)
+        self.form_group.setFixedWidth(400)
         layout_principal.addWidget(self.form_group)
 
         right_layout = QVBoxLayout()
@@ -122,41 +182,6 @@ class MainWindow(QMainWindow):
         
         layout_principal.addLayout(right_layout)
 
-    def init_tab_bilan(self):
-        layout = QVBoxLayout(self.tab_bilan)
-        layout.setContentsMargins(20, 20, 20, 20)
-        layout.setSpacing(15)
-
-        header_layout = QHBoxLayout()
-        title = QLabel("Tableau de Bord & Documents Comptables")
-        title.setStyleSheet("font-size: 18px; font-weight: bold; color: #1f2937;")
-        
-        self.btn_export_excel = QPushButton("📥 Exporter le Compte de Résultat Officiel (AG)")
-        self.btn_export_excel.setObjectName("btn_succes")
-        
-        header_layout.addWidget(title)
-        header_layout.addStretch()
-        header_layout.addWidget(self.btn_export_excel)
-        layout.addLayout(header_layout)
-
-        self.table_bilan = QTableWidget()
-        self.table_bilan.setColumnCount(3)
-        self.table_bilan.setHorizontalHeaderLabels(["Catégorie Comptable", "Type de Flux", "Solde Cumulé (€)"])
-        self.table_bilan.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
-        self.table_bilan.verticalHeader().setVisible(False)
-        self.table_bilan.setAlternatingRowColors(True)
-        layout.addWidget(self.table_bilan)
-
-        solde_widget = QWidget()
-        solde_widget.setStyleSheet("background-color: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 15px;")
-        solde_layout = QHBoxLayout(solde_widget)
-        
-        self.label_solde = QLabel("Solde Actuel : -- €")
-        self.label_solde.setStyleSheet("font-size: 16px; font-weight: bold; color: #166534;")
-        solde_layout.addWidget(self.label_solde, alignment=Qt.AlignmentFlag.AlignCenter)
-        
-        layout.addWidget(solde_widget)
-
     def demander_texte_et_type(self, titre: str, options_type: list[str]):
         dialog = QDialog(self)
         dialog.setWindowTitle(titre)
@@ -164,7 +189,7 @@ class MainWindow(QMainWindow):
         
         layout = QVBoxLayout(dialog)
         input_nom = QLineEdit()
-        input_nom.setPlaceholderText("Nom (ex: BDE, Frais bancaires...)")
+        input_nom.setPlaceholderText("Nom...")
         layout.addWidget(input_nom)
         
         combo_type = QComboBox()

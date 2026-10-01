@@ -94,14 +94,39 @@ class TresoQueries:
             """)
             return cursor.fetchall()
 
-    def get_totaux_par_categorie(self):
+    def get_totaux_filtres(self, mois: str = None, categorie_id: int = None, tier_id: int = None):
+        """Calcule les totaux par catégorie en appliquant dynamiquement des filtres optionnels."""
         with self.db.get_connection() as conn:
             cursor = conn.cursor()
-            cursor.execute("""
+            
+            query = """
                 SELECT c.nom, c.type_flux, COALESCE(SUM(t.montant), 0.0) as total
                 FROM categories c
                 LEFT JOIN transactions t ON c.id = t.categorie_id
+            """
+            conditions = []
+            params = []
+
+            if mois:
+                # Filtrage sur l'année-mois (ex: '2026-10')
+                conditions.append("strftime('%Y-%m', t.date_transaction) = ?")
+                params.append(mois)
+            
+            if categorie_id:
+                conditions.append("c.id = ?")
+                params.append(categorie_id)
+
+            if tier_id:
+                conditions.append("t.tier_id = ?")
+                params.append(tier_id)
+
+            if conditions:
+                query += " WHERE " + " AND ".join(conditions)
+
+            query += """
                 GROUP BY c.id, c.nom, c.type_flux
                 ORDER BY c.type_flux DESC, c.nom ASC
-            """)
+            """
+
+            cursor.execute(query, params)
             return cursor.fetchall()
