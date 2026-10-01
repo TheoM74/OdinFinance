@@ -1,7 +1,8 @@
 from PyQt6.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, 
     QLabel, QTableWidget, QTableWidgetItem, QLineEdit, 
-    QPushButton, QComboBox, QDateEdit, QFormLayout, QGroupBox, QMessageBox
+    QPushButton, QComboBox, QDateEdit, QFormLayout, QGroupBox, QMessageBox,
+    QDialog, QDialogButtonBox
 )
 from PyQt6.QtCore import QDate
 
@@ -42,8 +43,21 @@ class MainWindow(QMainWindow):
         self.ref_input = QLineEdit()
         self.ref_input.setPlaceholderText("Numéro de facture optionnel")
 
+        # Layout Catégorie avec bouton "+"
+        cat_layout = QHBoxLayout()
         self.cat_combo = QComboBox()
+        self.btn_add_cat = QPushButton("+")
+        self.btn_add_cat.setFixedWidth(30)
+        cat_layout.addWidget(self.cat_combo)
+        cat_layout.addWidget(self.btn_add_cat)
+
+        # Layout Tier avec bouton "+"
+        tier_layout = QHBoxLayout()
         self.tier_combo = QComboBox()
+        self.btn_add_tier = QPushButton("+")
+        self.btn_add_tier.setFixedWidth(30)
+        tier_layout.addWidget(self.tier_combo)
+        tier_layout.addWidget(self.btn_add_tier)
 
         self.btn_ajouter = QPushButton("Enregistrer la transaction")
         self.btn_ajouter.setStyleSheet("background-color: #2b5b84; color: white; font-weight: bold; padding: 6px;")
@@ -52,11 +66,11 @@ class MainWindow(QMainWindow):
         form_layout.addRow("Description :", self.desc_input)
         form_layout.addRow("Montant (€) :", self.amount_input)
         form_layout.addRow("Réf. Facture :", self.ref_input)
-        form_layout.addRow("Catégorie :", self.cat_combo)
-        form_layout.addRow("Tier :", self.tier_combo)
+        form_layout.addRow("Catégorie :", cat_layout)
+        form_layout.addRow("Tier :", tier_layout)
         form_layout.addRow(self.btn_ajouter)
 
-        form_group.setFixedWidth(350)
+        form_group.setFixedWidth(380)
         content_layout.addWidget(form_group)
 
         # 2. Tableau des transactions (Côté droit)
@@ -67,7 +81,6 @@ class MainWindow(QMainWindow):
         self.table_transactions.setHorizontalHeaderLabels([
             "Date", "Description", "Montant", "Catégorie", "Tier", "Facture"
         ])
-        # Ajustement des colonnes
         self.table_transactions.horizontalHeader().setStretchLastSection(True)
         
         table_layout.addWidget(self.table_transactions)
@@ -83,3 +96,28 @@ class MainWindow(QMainWindow):
         else:
             msg.setIcon(QMessageBox.Icon.Information)
         msg.exec()
+
+    def demander_texte_et_type(self, titre: str, options_type: list[str]):
+        """Ouvre une popup simple pour créer un élément avec un nom et un type."""
+        dialog = QDialog(self)
+        dialog.setWindowTitle(titre)
+        dialog.resize(300, 150)
+        
+        layout = QVBoxLayout(dialog)
+        
+        input_nom = QLineEdit()
+        input_nom.setPlaceholderText("Nom...")
+        layout.addWidget(input_nom)
+        
+        combo_type = QComboBox()
+        combo_type.addItems(options_type)
+        layout.addWidget(combo_type)
+        
+        buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
+        buttons.accepted.connect(dialog.accept)
+        buttons.rejected.connect(dialog.reject)
+        layout.addWidget(buttons)
+        
+        if dialog.exec() == QDialog.DialogCode.Accepted:
+            return input_nom.text().strip(), combo_type.currentText()
+        return None, None

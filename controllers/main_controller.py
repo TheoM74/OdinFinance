@@ -1,6 +1,6 @@
 from views.main_window import MainWindow
 from database.queries import TresoQueries
-from PyQt6.QtCore import QDate
+from PyQt6.QtWidgets import QTableWidgetItem
 
 class MainController:
     def __init__(self, view: MainWindow, queries: TresoQueries):
@@ -13,6 +13,8 @@ class MainController:
 
         # Connexion des signaux (clics de boutons)
         self.view.btn_ajouter.clicked.connect(self.ajouter_transaction)
+        self.view.btn_add_cat.clicked.connect(self.ouvrir_ajout_categorie)
+        self.view.btn_add_tier.clicked.connect(self.ouvrir_ajout_tier)
 
     def charger_combobox(self):
         """Remplit les menus déroulants (Catégories et Tiers) depuis la BDD."""
@@ -35,7 +37,6 @@ class MainController:
         self.view.table_transactions.setRowCount(len(transactions))
 
         for row_idx, trans in enumerate(transactions):
-            # trans = (id, date_transaction, description, montant, reference_facture, categorie_nom, type_flux, tier_nom)
             date_str = trans[1]
             desc = trans[2]
             montant = f"{trans[3]:.2f} €"
@@ -45,13 +46,7 @@ class MainController:
 
             values = [date_str, desc, montant, cat, tier, ref]
             for col_idx, val in enumerate(values):
-                self.view.table_transactions.setItem(row_idx, col_idx, self.creer_item(val))
-
-    def creer_item(self, texte: str):
-        """Crée un item de tableau non modifiable directement."""
-        from PyQt6.QtWidgets import QTableWidgetItem
-        item = QTableWidgetItem(texte)
-        return item
+                self.view.table_transactions.setItem(row_idx, col_idx, QTableWidgetItem(val))
 
     def ajouter_transaction(self):
         """Récupère les données du formulaire et les insère en BDD."""
@@ -63,7 +58,6 @@ class MainController:
         categorie_id = self.view.cat_combo.currentData()
         tier_id = self.view.tier_combo.currentData()
 
-        # Validations basiques
         if not description:
             self.view.afficher_message("Erreur", "Veuillez saisir une description.", is_erreur=True)
             return
@@ -76,7 +70,6 @@ class MainController:
             self.view.afficher_message("Erreur", "Le montant doit être un nombre positif valide.", is_erreur=True)
             return
 
-        # Insertion en BDD via les requêtes
         try:
             self.queries.ajouter_transaction(
                 date=date_str,
@@ -87,7 +80,6 @@ class MainController:
                 tier_id=tier_id
             )
 
-            # Succès : réinitialisation du formulaire et rechargement du tableau
             self.view.desc_input.clear()
             self.view.amount_input.clear()
             self.view.ref_input.clear()
@@ -96,3 +88,23 @@ class MainController:
             self.view.afficher_message("Succès", "Transaction enregistrée avec succès !")
         except Exception as e:
             self.view.afficher_message("Erreur BDD", f"Erreur lors de l'enregistrement : {str(e)}", is_erreur=True)
+
+    def ouvrir_ajout_categorie(self):
+        nom, type_flux = self.view.demander_texte_et_type("Ajouter une catégorie", ["RECETTE", "DEPENSE"])
+        if nom:
+            try:
+                self.queries.ajouter_categorie(nom, type_flux)
+                self.charger_combobox()
+                self.view.afficher_message("Succès", f"Catégorie '{nom}' ajoutée !")
+            except Exception as e:
+                self.view.afficher_message("Erreur", f"Impossible d'ajouter la catégorie : {str(e)}", is_erreur=True)
+
+    def ouvrir_ajout_tier(self):
+        nom, type_tier = self.view.demander_texte_et_type("Ajouter un tier", ["MORAL", "PHYSIQUE"])
+        if nom:
+            try:
+                self.queries.ajouter_tier(nom, type_tier)
+                self.charger_combobox()
+                self.view.afficher_message("Succès", f"Tier '{nom}' ajouté !")
+            except Exception as e:
+                self.view.afficher_message("Erreur", f"Impossible d'ajouter le tier : {str(e)}", is_erreur=True)
