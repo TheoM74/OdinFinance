@@ -52,13 +52,19 @@ jobs:
       - name: Compresser le résultat (Windows)
         if: runner.os == 'Windows'
         run: |
-          Compress-Archive -Path dist\OdinFinance -DestinationPath OdinFinance-Windows.zip
+          New-Item -ItemType Directory -Force release-windows | Out-Null
+          Copy-Item -Recurse dist\OdinFinance release-windows\OdinFinance
+          Copy-Item README.md, LICENSE release-windows\
+          Compress-Archive -Path release-windows\* -DestinationPath OdinFinance-Windows.zip
 
       - name: Compresser le résultat (macOS)
         if: runner.os == 'macOS'
         run: |
-          cd dist
-          zip -y -r ../OdinFinance-macOS.zip OdinFinance.app
+          mkdir release-macos
+          cp -R dist/OdinFinance.app release-macos/
+          cp README.md LICENSE release-macos/
+          cd release-macos
+          zip -y -r ../OdinFinance-macOS.zip .
 
       - name: Publier les exécutables dans la Release GitHub
         uses: softprops/action-gh-release@v2
