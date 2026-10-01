@@ -7,32 +7,35 @@ class MainController:
         self.view = view
         self.queries = queries
 
-        # Chargement initial des données dans l'interface
+        # Chargement initial des données
         self.charger_combobox()
-        self.charger_tableau_transactions()
+        self.charger_donnees_completes()
 
-        # Connexion des signaux (clics de boutons)
+        # Connexions des signaux
         self.view.btn_ajouter.clicked.connect(self.ajouter_transaction)
         self.view.btn_add_cat.clicked.connect(self.ouvrir_ajout_categorie)
         self.view.btn_add_tier.clicked.connect(self.ouvrir_ajout_tier)
 
     def charger_combobox(self):
-        """Remplit les menus déroulants (Catégories et Tiers) depuis la BDD."""
-        # Catégories
+        """Remplit les menus déroulants (Catégories et Tiers)."""
         self.view.cat_combo.clear()
         self.categories_data = self.queries.get_toutes_categories()
         for cat_id, nom, type_flux in self.categories_data:
             self.view.cat_combo.addItem(f"[{type_flux}] {nom}", cat_id)
 
-        # Tiers
         self.view.tier_combo.clear()
         self.view.tier_combo.addItem("-- Aucun --", None)
         self.tiers_data = self.queries.get_tous_tiers()
         for tier_id, nom, type_tier in self.tiers_data:
             self.view.tier_combo.addItem(f"{nom} ({type_tier})", tier_id)
 
+    def charger_donnees_completes(self):
+        """Actualise à la fois le tableau des transactions et le bilan financier."""
+        self.charger_tableau_transactions()
+        self.charger_tableau_bilan()
+
     def charger_tableau_transactions(self):
-        """Charge l'historique des transactions dans le tableau de droite."""
+        """Remplit l'historique des transactions."""
         transactions = self.queries.get_toutes_transactions()
         self.view.table_transactions.setRowCount(len(transactions))
 
@@ -48,8 +51,35 @@ class MainController:
             for col_idx, val in enumerate(values):
                 self.view.table_transactions.setItem(row_idx, col_idx, QTableWidgetItem(val))
 
+    def charger_tableau_bilan(self):
+        """Calcule et remplit le tableau de synthèse et le solde global pour l'AG."""
+        totaux = self.queries.get_totaux_par_categorie()
+        self.view.table_bilan.setRowCount(len(totaux))
+
+        total_recettes = 0.0
+        total_depenses = 0.0
+
+        for row_idx, (nom_cat, type_flux, somme) in enumerate(totaux):
+            if type_flux == "RECETTE":
+                total_recettes += somme
+            else:
+                total_depenses += somme
+
+            self.view.table_bilan.setItem(row_idx, 0, QTableWidgetItem(nom_cat))
+            self.view.table_bilan.setItem(row_idx, 1, QTableWidgetItem(type_flux))
+            
+            item_somme = QTableWidgetItem(f"{somme:.2f} €")
+            self.view.table_bilan.setItem(row_idx, 2, item_somme)
+
+        # Calcul du solde net
+        solde_net = total_recettes - total_depenses
+        self.view.label_solde.setText(
+            f"💰 Recettes totales : {total_recettes:.2f} €  |  "
+            f"📉 Dépenses totales : {total_depenses:.2f} €  ||  "
+            f"Solde Net en Caisse : {solde_net:.2f} €"
+        )
+
     def ajouter_transaction(self):
-        """Récupère les données du formulaire et les insère en BDD."""
         date_str = self.view.date_input.date().toString("yyyy-MM-dd")
         description = self.view.desc_input.text().strip()
         montant_str = self.view.amount_input.text().strip().replace(",", ".")
@@ -83,7 +113,9 @@ class MainController:
             self.view.desc_input.clear()
             self.view.amount_input.clear()
             self.view.ref_input.clear()
-            self.charger_tableau_transactions()
+            
+            # Rafraîchir toutes les vues (transactions et bilan)
+            self.charger_donnees_completes()
 
             self.view.afficher_message("Succès", "Transaction enregistrée avec succès !")
         except Exception as e:
@@ -95,10 +127,12 @@ class MainController:
             try:
                 self.queries.ajouter_categorie(nom, type_flux)
                 self.charger_combobox()
+                self.charger_donnees_completes()
                 self.view.afficher_message("Succès", f"Catégorie '{nom}' ajoutée !")
             except Exception as e:
                 self.view.afficher_message("Erreur", f"Impossible d'ajouter la catégorie : {str(e)}", is_erreur=True)
 
+    # 2. ouvrir_ajout_tier = lambda self: ... # géré en dessous proprement
     def ouvrir_ajout_tier(self):
         nom, type_tier = self.view.demander_texte_et_type("Ajouter un tier", ["MORAL", "PHYSIQUE"])
         if nom:

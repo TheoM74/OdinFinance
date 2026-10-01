@@ -66,3 +66,16 @@ class TresoQueries:
                 ORDER BY t.date_transaction DESC, t.id DESC
             """)
             return cursor.fetchall()
+
+    def get_totaux_par_categorie(self):
+        """Calcule la somme des montants par catégorie pour le bilan."""
+        with self.db.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT c.nom, c.type_flux, COALESCE(SUM(t.montant), 0.0) as total
+                FROM categories c
+                LEFT JOIN transactions t ON c.id = t.categorie_id
+                GROUP BY c.id, c.nom, c.type_flux
+                ORDER BY c.type_flux DESC, c.nom ASC
+            """)
+            return cursor.fetchall()
