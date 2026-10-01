@@ -1,0 +1,109 @@
+/* --- resources/style.qss --- */
+QMainWindow {
+    background-color: #f4f6f9;
+    font-family: 'Segoe UI', Arial, sans-serif;
+}
+QGroupBox {
+    font-weight: bold;
+    font-size: 14px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    margin-top: 15px;
+    background-color: #ffffff;
+}
+QGroupBox::title {
+    subcontrol-origin: margin;
+    left: 15px;
+    padding: 0 5px;
+    color: #374151;
+}
+QLineEdit, QComboBox, QDateEdit {
+    padding: 8px;
+    border: 1px solid #d1d5db;
+    border-radius: 5px;
+    background-color: #f9fafb;
+    color: #1f2937;
+    font-size: 13px;
+}
+QLineEdit:focus, QComboBox:focus, QDateEdit:focus {
+    border: 1px solid #3b82f6;
+    background-color: #ffffff;
+}
+QPushButton {
+    padding: 8px 12px;
+    border-radius: 5px;
+    font-weight: bold;
+    font-size: 13px;
+    border: none;
+}
+QPushButton#btn_primaire {
+    background-color: #3b82f6;
+    color: white;
+}
+QPushButton#btn_primaire:hover {
+    background-color: #2563eb;
+}
+QPushButton#btn_danger {
+    background-color: #ef4444;
+    color: white;
+}
+QPushButton#btn_danger:hover {
+    background-color: #dc2626;
+}
+QPushButton#btn_secondaire {
+    background-color: #9ca3af;
+    color: white;
+}
+QPushButton#btn_secondaire:hover {
+    background-color: #6b7280;
+}
+QPushButton#btn_succes {
+    background-color: #10b981;
+    color: white;
+}
+QPushButton#btn_succes:hover {
+    background-color: #059669;
+}
+QPushButton#btn_icon {
+    background-color: #e5e7eb;
+    color: #374151;
+}
+QPushButton#btn_icon:hover {
+    background-color: #d1d5db;
+}
+QTableWidget {
+    background-color: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    gridline-color: #f3f4f6;
+    font-size: 13px;
+}
+QHeaderView::section {
+    background-color: #f8fafc;
+    padding: 10px;
+    border: none;
+    border-bottom: 2px solid #e5e7eb;
+    font-weight: bold;
+    color: #475569;
+}
+QTabWidget::pane {
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    background: #ffffff;
+    top: -1px;
+}
+QTabBar::tab {
+    background: #f3f4f6;
+    padding: 10px 20px;
+    margin-right: 4px;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+    color: #6b7280;
+    font-weight: bold;
+}
+QTabBar::tab:selected {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-bottom-color: #ffffff;
+    color: #3b82f6;
+}

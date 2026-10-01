@@ -1,22 +1,20 @@
 import sys
 import os
 
-# --- CORRECTION SPÉCIFIQUE MACOS (COCOA PLUGIN) ---
-# Ne s'applique que si l'application tourne sur un Mac, sans perturber Windows/Linux
+# --- CORRECTION COCOA ULTRA-FORCÉE POUR MAC ---
 if sys.platform == "darwin":
     try:
         import PyQt6
-        pyqt_dir = os.path.dirname(PyQt6.__file__)
-        # Recherche dynamique du dossier "platforms" contenant libqcocoa.dylib
-        for root, dirs, files in os.walk(pyqt_dir):
-            if "platforms" in dirs:
-                platforms_path = os.path.join(root, "platforms")
-                if os.path.exists(os.path.join(platforms_path, "libqcocoa.dylib")):
-                    os.environ["QT_QPA_PLATFORM_PLUGIN_PATH"] = platforms_path
-                    break
-    except Exception as e:
-        print(f"Avertissement config Mac Qt : {e}")
-# ---------------------------------------------------
+        pyqt_path = os.path.dirname(PyQt6.__file__)
+        platforms_dir = os.path.join(pyqt_path, "Qt6", "plugins", "platforms")
+        if not os.path.exists(platforms_dir):
+            platforms_dir = os.path.join(pyqt_path, "Qt", "plugins", "platforms")
+        
+        if os.path.exists(platforms_dir):
+            os.environ["QT_QPA_PLATFORM_PLUGIN_PATH"] = platforms_dir
+    except Exception:
+        pass
+# ---------------------------------------------
 
 from PyQt6.QtWidgets import QApplication
 from database.db_manager import DBManager
@@ -48,19 +46,24 @@ def initialiser_donnees_test(queries: TresoQueries):
         queries.ajouter_tier(nom, type_tier)
 
 def main():
-    # 1. Initialisation de l'application Qt
     app = QApplication(sys.argv)
 
-    # 2. Initialisation de la BDD et des requêtes
+    # --- CHARGEMENT DYNAMIQUE DU FICHIER DE STYLE ---
+    chemin_style = os.path.join(os.path.dirname(__file__), "resources", "style.qss")
+    if os.path.exists(chemin_style):
+        with open(chemin_style, "r", encoding="utf-8") as fichier_qss:
+            app.setStyleSheet(fichier_qss.read())
+    else:
+        print("Attention : Fichier de style (resources/style.qss) introuvable.")
+    # -------------------------------------------------
+
     db = DBManager()
     queries = TresoQueries(db)
     initialiser_donnees_test(queries)
 
-    # 3. Création de la Vue et du Contrôleur (Architecture MVC)
     view = MainWindow()
     controller = MainController(view, queries)
 
-    # 4. Affichage de la fenêtre et lancement de la boucle événementielle
     view.show()
     sys.exit(app.exec())
 
