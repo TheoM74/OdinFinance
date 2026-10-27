@@ -1,124 +1,412 @@
-/* --- resources/style.qss --- */
-QMainWindow {
-    background-color: #f4f6f9;
-    font-family: 'Segoe UI', Arial, sans-serif;
+/* --- resources/style.qss ---
+   Gabarit commun aux deux thèmes : views/theme.py remplace chaque jeton (dollar + nom) par sa valeur.
+   Les couleurs avec transparence sont au format Qt #AARRGGBB. */
+
+* {
+    font-family: "$police_texte";
+    font-size: ${taille_texte}px;
+    color: $texte;
 }
-QGroupBox {
-    font-weight: bold;
-    font-size: 13px;
-    border: 1px solid #d1d5db;
-    border-radius: 8px;
-    margin-top: 12px;
-    padding-top: 15px; /* Laisse de l'espace pour éviter que le texte ne coupe la ligne */
-    background-color: #ffffff;
+
+QMainWindow, QDialog, QMessageBox {
+    background-color: $fond;
 }
-QGroupBox::title {
-    subcontrol-origin: margin;
-    subcontrol-position: top left;
-    left: 15px;
-    padding: 0 5px;
-    color: #374151;
-    background-color: #ffffff;
+
+QStackedWidget, QScrollArea, QScrollArea > QWidget > QWidget, QWidget#page {
+    background: transparent;
+    border: none;
 }
+
+/* ---------- En-tête de l'application ---------- */
+QWidget#entete {
+    background-color: $surface;
+    border-bottom: 1px solid $trait_fort;
+}
+
+QTabBar#navigation {
+    background: transparent;
+}
+QTabBar#navigation::tab {
+    background: transparent;
+    color: $texte_doux;
+    font-family: "$police_titre";
+    font-weight: 600;
+    padding: 18px 16px 15px 16px;
+    margin: 0 2px;
+    border: none;
+    border-bottom: 3px solid transparent;
+}
+QTabBar#navigation::tab:hover {
+    color: $texte;
+}
+QTabBar#navigation::tab:selected {
+    color: $accent;
+    border-bottom: 3px solid $accent;
+}
+
+QLabel#exercice_entete {
+    color: $texte_doux;
+    font-size: ${taille_petite}px;
+}
+
+/* ---------- Typographie ---------- */
+QLabel[role="titre-page"] {
+    font-family: "$police_titre";
+    font-size: ${taille_titre}px;
+    font-weight: 600;
+    color: $titre;
+}
+QLabel[role="titre-section"] {
+    font-family: "$police_titre";
+    font-weight: 600;
+    color: $titre;
+}
+QLabel[role="legende"] {
+    font-family: "$police_titre";
+    font-size: ${taille_petite}px;
+    font-weight: 600;
+    color: $texte_doux;
+}
+QLabel[role="aide"] {
+    color: $texte_doux;
+}
+QLabel[role="erreur"] {
+    color: $danger;
+    font-size: ${taille_petite}px;
+}
+QLabel[role="etat-vide"] {
+    color: $texte_doux;
+    padding: 32px;
+}
+QLabel[role="montant"] {
+    font-family: "$police_titre";
+    font-weight: 600;
+}
+QLabel[role="montant-fort"] {
+    font-family: "$police_titre";
+    font-size: ${taille_titre}px;
+    font-weight: 600;
+}
+QLabel[signe="positif"] {
+    color: $positif;
+}
+QLabel[signe="negatif"] {
+    color: $danger;
+}
+
+/* ---------- Boutons ---------- */
+QPushButton {
+    background-color: transparent;
+    color: $texte;
+    border: 1px solid $trait_fort;
+    border-radius: ${rayon}px;
+    padding: 7px 14px;
+    font-family: "$police_titre";
+    font-weight: 600;
+    font-size: ${taille_bouton}px;
+    min-height: 20px;
+}
+QPushButton:hover {
+    background-color: $survol;
+    border-color: $accent;
+}
+QPushButton:pressed {
+    background-color: $accent_doux;
+}
+QPushButton:focus {
+    border: 2px solid $focus;
+    padding: 6px 13px;
+}
+QPushButton:disabled {
+    color: $texte_desactive;
+    border-color: $trait;
+    background-color: transparent;
+}
+
+QPushButton[variante="primaire"] {
+    background-color: $accent;
+    border-color: $accent;
+    color: $sur_accent;
+}
+QPushButton[variante="primaire"]:hover {
+    background-color: $accent_survol;
+    border-color: $accent_survol;
+}
+QPushButton[variante="primaire"]:focus {
+    border: 2px solid $focus;
+}
+QPushButton[variante="primaire"]:disabled {
+    background-color: $trait;
+    border-color: $trait;
+    color: $texte_desactive;
+}
+
+QPushButton[variante="danger"] {
+    color: $danger;
+    border-color: $danger;
+}
+QPushButton[variante="danger"]:hover {
+    background-color: $danger_doux;
+}
+QPushButton[variante="danger"]:disabled {
+    color: $texte_desactive;
+    border-color: $trait;
+}
+
+QPushButton[variante="discret"] {
+    border-color: transparent;
+    color: $texte_doux;
+}
+QPushButton[variante="discret"]:hover {
+    color: $texte;
+    background-color: $survol;
+}
+QPushButton[variante="discret"]:disabled {
+    border-color: transparent;
+}
+
+QPushButton[variante="segment"] {
+    border-radius: 0px;
+    color: $texte_doux;
+    padding: 7px 10px;
+}
+QPushButton[variante="segment"]:checked {
+    background-color: $accent_doux;
+    border-color: $accent;
+    color: $accent;
+}
+QPushButton[position="gauche"] {
+    border-top-left-radius: ${rayon}px;
+    border-bottom-left-radius: ${rayon}px;
+}
+QPushButton[position="droite"] {
+    border-top-right-radius: ${rayon}px;
+    border-bottom-right-radius: ${rayon}px;
+}
+
+QPushButton[variante="icone"] {
+    padding: 6px;
+    min-width: 22px;
+}
+QPushButton[variante="icone"]:focus {
+    padding: 5px;
+}
+
+/* ---------- Champs de saisie ---------- */
 QLineEdit, QComboBox, QDateEdit {
-    padding: 8px;
-    border: 1px solid #d1d5db;
-    border-radius: 5px;
-    background-color: #f9fafb;
-    color: #1f2937;
-    font-size: 13px;
+    background-color: $champ;
+    border: 1px solid $trait_fort;
+    border-radius: ${rayon_petit}px;
+    padding: 6px 10px;
+    min-height: 20px;
+    selection-background-color: $selection;
+    selection-color: $texte_selection;
+}
+QLineEdit:hover, QComboBox:hover, QDateEdit:hover {
+    border-color: $texte_doux;
 }
 QLineEdit:focus, QComboBox:focus, QDateEdit:focus {
-    border: 1px solid #3b82f6;
-    background-color: #ffffff;
+    border: 1px solid $focus;
 }
-QPushButton {
-    padding: 8px 12px;
-    border-radius: 5px;
-    font-weight: bold;
-    font-size: 13px;
+QLineEdit[erreur="true"], QComboBox[erreur="true"], QDateEdit[erreur="true"] {
+    border: 1px solid $danger;
+    background-color: $danger_doux;
+}
+QLineEdit:disabled, QComboBox:disabled, QDateEdit:disabled {
+    color: $texte_desactive;
+    border-color: $trait;
+}
+
+QComboBox::drop-down, QDateEdit::drop-down {
+    subcontrol-origin: padding;
+    subcontrol-position: center right;
+    width: 26px;
     border: none;
 }
-QPushButton#btn_primaire {
-    background-color: #3b82f6;
-    color: white;
+QComboBox::down-arrow {
+    image: url("$image_chevron");
+    width: 12px;
+    height: 12px;
 }
-QPushButton#btn_primaire:hover {
-    background-color: #2563eb;
+QComboBox::down-arrow:disabled {
+    image: url("$image_chevron_desactive");
 }
-QPushButton#btn_danger {
-    background-color: #ef4444;
-    color: white;
+QDateEdit::down-arrow {
+    image: url("$image_calendrier");
+    width: 14px;
+    height: 14px;
 }
-QPushButton#btn_danger:hover {
-    background-color: #dc2626;
-}
-QPushButton#btn_secondaire {
-    background-color: #9ca3af;
-    color: white;
-}
-QPushButton#btn_secondaire:hover {
-    background-color: #6b7280;
-}
-QPushButton#btn_succes {
-    background-color: #10b981;
-    color: white;
-}
-QPushButton#btn_succes:hover {
-    background-color: #059669;
-}
-QPushButton#btn_icon {
-    background-color: #e5e7eb;
-    color: #374151;
-}
-QPushButton#btn_icon:hover {
-    background-color: #d1d5db;
-}
-QTableWidget {
-    background-color: #ffffff;
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
-    gridline-color: #f3f4f6;
-    font-size: 13px;
-    color: #1f2937; /* Texte sombre par défaut */
+QComboBox QAbstractItemView {
+    background-color: $surface;
+    border: 1px solid $trait_fort;
+    selection-background-color: $accent_doux;
+    selection-color: $texte;
+    outline: none;
+    padding: 4px;
 }
 
-QTableWidget::item {
-    padding: 6px;
-    color: #1f2937; /* Force le texte des cellules à être sombre et lisible */
+/* ---------- Tableaux et listes ---------- */
+QTableView, QTreeView, QListView {
+    background-color: $surface;
+    alternate-background-color: $surface_alt;
+    border: 1px solid $trait;
+    border-radius: ${rayon}px;
+    gridline-color: $trait;
+    selection-background-color: $selection;
+    selection-color: $texte_selection;
+    outline: none;
 }
-
-QTableWidget::item:selected {
-    background-color: #3b82f6; /* Bleu moderne pour la sélection */
-    color: #ffffff; /* Texte en blanc uniquement sur la ligne sélectionnée */
+QTableView::item, QTreeView::item {
+    padding: 4px 8px;
+    border: none;
 }
-
+QTableView::item:hover, QTreeView::item:hover {
+    background-color: $survol;
+}
+QTableView::item:selected, QTreeView::item:selected {
+    background-color: $selection;
+    color: $texte_selection;
+}
+QTableView:focus, QTreeView:focus {
+    border: 1px solid $focus;
+}
+QTreeView::branch {
+    background: transparent;
+    image: none;
+    border-image: none;
+}
+QHeaderView {
+    background-color: transparent;
+}
 QHeaderView::section {
-    background-color: #f8fafc;
-    padding: 10px;
+    background-color: $surface;
+    color: $texte_doux;
     border: none;
-    border-bottom: 2px solid #e5e7eb;
-    font-weight: bold;
-    color: #475569;
+    border-bottom: 1px solid $trait_fort;
+    padding: 8px;
+    font-family: "$police_titre";
+    font-size: ${taille_petite}px;
+    font-weight: 600;
 }
-QTabWidget::pane {
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
-    background: #ffffff;
-    top: -1px;
+QHeaderView::section:hover {
+    color: $texte;
 }
-QTabBar::tab {
-    background: #f3f4f6;
-    padding: 10px 20px;
-    margin-right: 4px;
-    border-top-left-radius: 6px;
-    border-top-right-radius: 6px;
-    color: #6b7280;
-    font-weight: bold;
+QHeaderView::up-arrow, QHeaderView::down-arrow {
+    width: 0px;
+    height: 0px;
 }
-QTabBar::tab:selected {
-    background: #ffffff;
-    border: 1px solid #e5e7eb;
-    border-bottom-color: #ffffff;
-    color: #3b82f6;
+QTableCornerButton::section {
+    background-color: $surface;
+    border: none;
+}
+
+/* ---------- Barres de défilement ---------- */
+QScrollBar:vertical {
+    background: transparent;
+    width: 12px;
+    margin: 0;
+}
+QScrollBar::handle:vertical {
+    background: $surface_2;
+    border: 1px solid $trait_fort;
+    border-radius: ${rayon_petit}px;
+    min-height: 32px;
+}
+QScrollBar:horizontal {
+    background: transparent;
+    height: 12px;
+    margin: 0;
+}
+QScrollBar::handle:horizontal {
+    background: $surface_2;
+    border: 1px solid $trait_fort;
+    border-radius: ${rayon_petit}px;
+    min-width: 32px;
+}
+QScrollArea#zone_formulaire QScrollBar:vertical {
+    width: 18px;
+    padding-left: 6px;
+}
+QScrollBar::handle:hover {
+    border-color: $accent;
+}
+QScrollBar::add-line, QScrollBar::sub-line {
+    width: 0px;
+    height: 0px;
+}
+QScrollBar::add-page, QScrollBar::sub-page {
+    background: none;
+}
+
+/* ---------- Divers ---------- */
+QToolTip {
+    background-color: $surface;
+    color: $texte;
+    border: 1px solid $trait_fort;
+    padding: 6px 8px;
+}
+
+QStatusBar {
+    background-color: $surface;
+    color: $texte_doux;
+    border-top: 1px solid $trait;
+}
+QStatusBar QLabel {
+    color: $texte_doux;
+    font-size: ${taille_petite}px;
+    padding: 2px 8px;
+}
+QStatusBar::item {
+    border: none;
+}
+
+QMenu {
+    background-color: $surface;
+    border: 1px solid $trait_fort;
+    padding: 4px;
+}
+QMenu::item {
+    padding: 6px 18px;
+}
+QMenu::item:selected {
+    background-color: $accent_doux;
+    color: $texte;
+}
+
+QCalendarWidget QWidget#qt_calendar_navigationbar {
+    background-color: $surface;
+}
+QCalendarWidget QToolButton {
+    background: transparent;
+    border: none;
+    padding: 4px 8px;
+    font-family: "$police_titre";
+    font-weight: 600;
+}
+QCalendarWidget QToolButton:hover {
+    background-color: $survol;
+}
+QCalendarWidget QToolButton::menu-indicator {
+    image: none;
+}
+QCalendarWidget QSpinBox {
+    background-color: $champ;
+    border: 1px solid $trait_fort;
+    selection-background-color: $selection;
+}
+QCalendarWidget QAbstractItemView:enabled {
+    background-color: $champ;
+    color: $texte;
+    selection-background-color: $accent;
+    selection-color: $sur_accent;
+}
+QCalendarWidget QAbstractItemView:disabled {
+    color: $texte_desactive;
+}
+
+QMessageBox QLabel {
+    color: $texte;
+}
+QDialogButtonBox QPushButton {
+    min-width: 96px;
 }
