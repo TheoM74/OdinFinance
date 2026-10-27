@@ -190,6 +190,11 @@ class GestionnaireTheme(QObject):
         self.theme = THEMES.get(identifiant, CYBERPUNK)
         app.installEventFilter(self)
 
+    def detacher(self):
+        """Retire le filtre d'événements avant la fermeture : sinon Qt l'appelle pendant la destruction des widgets,
+        alors que les objets Python sont déjà libérés (plantage à la sortie, constaté sous Linux)."""
+        self.app.removeEventFilter(self)
+
     def eventFilter(self, objet, evenement):
         # Chaque widget (y compris ceux des boîtes de dialogue créées plus tard) reçoit la typographie du thème
         if evenement.type() == QEvent.Type.Polish and isinstance(objet, QWidget):

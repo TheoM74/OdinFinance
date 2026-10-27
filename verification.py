@@ -10,7 +10,7 @@ import tempfile
 import traceback
 from datetime import date
 
-from PyQt6.QtCore import QSettings
+from PyQt6.QtCore import QEvent, QSettings
 from PyQt6.QtGui import QFontDatabase
 from PyQt6.QtWidgets import QApplication
 
@@ -34,6 +34,7 @@ def _rapporter(message: str):
 
 
 def verifier(app: QApplication) -> int:
+    themes = None
     try:
         with tempfile.TemporaryDirectory() as dossier:
             settings = QSettings(os.path.join(dossier, "reglages.ini"), QSettings.Format.IniFormat)
@@ -75,10 +76,17 @@ def verifier(app: QApplication) -> int:
             exporter_bilan(classeur, d.nom_association, d.exercice, d.comptes, d.categories, d.operations)
             if os.path.getsize(classeur) == 0:
                 raise RuntimeError("Le bilan exporté est vide")
+            # Fermeture dans l'ordre, comme à la sortie de l'application
             view.close()
+            view.deleteLater()
+            del controleur, view
+            app.sendPostedEvents(None, QEvent.Type.DeferredDelete.value)
 
         _rapporter(f"OdinFinance {app.applicationVersion()} : autotest réussi.")
         return 0
     except Exception:
         _rapporter("OdinFinance : autotest échoué.\n" + traceback.format_exc())
         return 1
+    finally:
+        if themes:
+            themes.detacher()

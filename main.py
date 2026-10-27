@@ -52,7 +52,9 @@ def main():
     controller = MainController(view, queries, themes, settings, chemin_base)  # référence gardée jusqu'à la fin
 
     view.show()
-    sys.exit(app.exec())
+    code = app.exec()
+    themes.detacher()
+    sys.exit(code)
 
 
 if __name__ == "__main__":
