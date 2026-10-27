@@ -119,7 +119,8 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: OdinFinance-${{ matrix.name }}
-          path: OdinFinance-*.*
+          # Nom exact de l'archive : sous Windows le motif est insensible à la casse et prenait aussi le journal de l'autotest
+          path: OdinFinance-${{ matrix.name }}.*
           if-no-files-found: error
 
   release:
