@@ -11,3 +11,8 @@ tresorerie.db
 # Fichiers IDE
 .vscode/
 .idea/
+# Compilation PyInstaller locale
+build/
+dist/
+*.spec
+odinfinance-autotest.log

@@ -1,12 +1,27 @@
 # OdinFinance - Gestion de Trésorerie Associative
 
-Logiciel de bureau multiplateforme (Windows et macOS) conçu pour la gestion comptable et la préparation des bilans financiers d'assemblées générales (AG) d'associations.
+Logiciel de bureau multiplateforme (Windows, macOS et Linux) conçu pour la gestion comptable et la préparation des bilans financiers d'assemblées générales (AG) d'associations.
 
 ## Description du Projet
 
 OdinFinance a été développé pour répondre aux exigences comptables et de gestion financière des associations. L'application centralise les flux financiers de chaque compte de trésorerie (compte courant, livret, caisses), garantit l'intégrité stricte des données via une base de données relationnelle, et génère le bilan financier présenté en AG au format du classeur Excel de l'association.
 
-Pour les utilisateurs finaux, des exécutables autonomes pour Windows et macOS sont compilés et publiés automatiquement pour chaque version officielle via les GitHub Releases.
+Pour les utilisateurs finaux, des exécutables autonomes pour Windows, macOS et Linux sont compilés et publiés automatiquement pour chaque version officielle via les GitHub Releases.
+
+## Téléchargement et installation
+
+Télécharger l'archive de son système dans la [dernière Release](https://github.com/TheoM74/OdinFinance/releases/latest). Python n'est pas nécessaire.
+
+* **Windows** (`OdinFinance-Windows.zip`) : extraire l'archive, puis lancer `OdinFinance\OdinFinance.exe`. Au premier lancement, Windows SmartScreen peut afficher « Windows a protégé votre ordinateur » : cliquer sur « Informations complémentaires » puis « Exécuter quand même » (l'application n'est pas signée).
+* **macOS** (`OdinFinance-macOS.zip`, Mac à puce Apple M1 ou plus récent) : extraire l'archive et glisser `OdinFinance.app` dans Applications. L'application n'étant pas signée, faire au premier lancement un clic droit sur l'application puis « Ouvrir », ou autoriser l'ouverture dans Réglages Système > Confidentialité et sécurité.
+* **Linux** (`OdinFinance-Linux.tar.gz`, distributions récentes en x86_64 : Ubuntu 22.04 ou plus récent, Debian 12, Fedora…) :
+  ```bash
+  mkdir OdinFinance && tar -xzf OdinFinance-Linux.tar.gz -C OdinFinance
+  ./OdinFinance/OdinFinance/OdinFinance
+  ```
+  Si le message « could not load the Qt platform plugin "xcb" » apparaît, installer la bibliothèque manquante (Ubuntu / Debian : `sudo apt install libxcb-cursor0`).
+
+Les données d'une version précédente sont reprises automatiquement (voir [Données](#données)).
 
 ## Architecture Technique et Choix de Conception
 
@@ -62,12 +77,15 @@ La base `tresorerie.db` est enregistrée dans le dossier de données de l'utilis
 
 * Windows : `%APPDATA%\OdinFinance\OdinFinance\tresorerie.db`
 * macOS : `~/Library/Application Support/OdinFinance/OdinFinance/tresorerie.db`
+* Linux : `~/.local/share/OdinFinance/OdinFinance/tresorerie.db`
 
-Au premier lancement, une base 1.x trouvée à l'ancien emplacement y est copiée puis migrée (montants en centimes, opérations rattachées à un compte « Compte courant »). Le chemin exact et un bouton « Ouvrir le dossier » se trouvent dans Paramètres : copier ce fichier suffit à sauvegarder la trésorerie.
+Le chemin exact et un bouton « Ouvrir le dossier » se trouvent dans Paramètres : copier ce fichier suffit à sauvegarder la trésorerie.
+
+**Reprendre les données de la version 1 :** la version 1 enregistrait sa base dans le dossier de l'application (sous Windows : `OdinFinance\_internal\tresorerie.db`). Dans Paramètres > Données, « Importer une base… » permet de choisir ce fichier : il est converti automatiquement (montants en centimes, opérations rattachées à un compte « Compte courant ») et les données présentes avant l'import sont sauvegardées à côté. Si la version 2 est extraite par-dessus le dossier de la version 1, la reprise est automatique au premier lancement.
 
 ## Automatisation et Déploiement
 
-Le projet intègre un pipeline d'intégration continue via GitHub Actions (`.github/workflows/build.yml`). Lors de la publication d'un tag de version (`v*`), les serveurs de build compilent simultanément l'application pour Windows et macOS afin de générer les paquets de distribution autonomes. Le dossier `resources/` (style et polices) est embarqué dans l'exécutable.
+Le projet intègre un pipeline d'intégration continue via GitHub Actions (`.github/workflows/build.yml`). À chaque envoi sur `main`, l'application est compilée avec PyInstaller sous Windows, macOS et Linux, les tests unitaires sont lancés, puis chaque exécutable compilé est vérifié par `OdinFinance --autotest` (interface construite dans les deux thèmes, saisie d'opérations et export d'un bilan, dans un dossier temporaire). Lors de la publication d'un tag de version (`v*`), une seule Release est créée avec les trois archives et les notes de version du dossier `notes-de-version/`. Le dossier `resources/` (style et polices) est embarqué dans l'exécutable.
 
 ## Instructions de Développement
 
@@ -109,6 +127,8 @@ python -m unittest discover -s tests -t .
 
 Les polices du thème Cyberpunk sont celles du portfolio : Oxanium (licence SIL Open Font), Cyberpunk et Blender Pro. Oxanium a été converti en trois graisses statiques (Regular, SemiBold, Bold) dont l'ascendante a été relevée pour que Qt n'écrête pas les capitales accentuées. Vérifier les licences de Cyberpunk et Blender Pro avant toute redistribution publique.
 
----
+## Collaborateurs
 
-*Projet développé par Théo Mauhin (B.U.T. Informatique, IUT d'Annecy) en collaboration avec l'assistant IA Gemini (Gemini 3 Flash, Paid tier).*
+* **Théo Mauhin** (B.U.T. Informatique, IUT d'Annecy) : auteur du projet, conception et besoins de la trésorerie du BDE ODIN.
+* **Gemini** (Google, Gemini 3 Flash) : assistant IA, collaboration sur la version 1 (application initiale, base de données, export et pipeline de build).
+* **Claude** (Anthropic, Claude Opus 5.5) : assistant IA, collaboration sur la version 2 (comptes et virements, export au format du bilan de l'association, thèmes Cyberpunk et classique, refonte de l'interface, tests et build Linux).

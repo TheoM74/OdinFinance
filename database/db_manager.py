@@ -1,7 +1,12 @@
 import os
+import shutil
 import sqlite3
 import sys
-from contextlib import contextmanager
+from contextlib import closing, contextmanager
+from datetime import datetime
+from pathlib import Path
+
+from database.modeles import ErreurMetier
 
 # Version du schéma, stockée dans PRAGMA user_version.
 # 0 = base créée par OdinFinance 1.x (montants REAL, pas de comptes), 2 = schéma actuel.
@@ -115,6 +120,34 @@ class DBManager:
             raise
         finally:
             conn.close()
+
+    def importer(self, source: str) -> str:
+        """Remplace la base par une copie de `source` (base 1.x ou 2.x), migrée si besoin.
+
+        La base actuelle est d'abord sauvegardée à côté ; son chemin est renvoyé. Si la copie ne peut pas
+        être convertie, la base actuelle est remise en place."""
+        if os.path.abspath(source) == os.path.abspath(self.db_path):
+            raise ErreurMetier("Ce fichier est déjà la base utilisée par OdinFinance.")
+        try:
+            with closing(sqlite3.connect(Path(source).resolve().as_uri() + "?mode=ro", uri=True)) as conn:
+                tables = {r[0] for r in conn.execute("SELECT name FROM sqlite_master WHERE type = 'table'")}
+                version = conn.execute("PRAGMA user_version").fetchone()[0]
+        except sqlite3.DatabaseError:
+            tables, version = set(), 0
+        if not {"categories", "tiers", "transactions"} <= tables:
+            raise ErreurMetier("Ce fichier n'est pas une base OdinFinance.")
+        if version > VERSION_SCHEMA:
+            raise ErreurMetier("Cette base vient d'une version plus récente d'OdinFinance : mettez l'application à jour.")
+
+        sauvegarde = os.path.join(os.path.dirname(self.db_path), f"tresorerie-avant-import-{datetime.now():%Y%m%d-%H%M%S}.db")
+        shutil.copy2(self.db_path, sauvegarde)
+        shutil.copy2(source, self.db_path)
+        try:
+            self.init_db()
+        except Exception as e:
+            shutil.copy2(sauvegarde, self.db_path)
+            raise ErreurMetier("Cette base n'a pas pu être convertie ; les données précédentes sont restaurées.") from e
+        return sauvegarde
 
     def init_db(self):
         """Crée le schéma d'une base neuve ou migre une base 1.x."""

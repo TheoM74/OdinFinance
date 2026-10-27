@@ -2,6 +2,7 @@ import os
 
 from PyQt6.QtCore import QDate, QUrl
 from PyQt6.QtGui import QDesktopServices
+from PyQt6.QtWidgets import QApplication, QFileDialog
 
 from controllers.commun import editer_avec_dialogue
 from database.modeles import ErreurMetier
@@ -20,6 +21,7 @@ class ParametresController:
         v.btn_enregistrer_association.clicked.connect(self.enregistrer_association)
         v.nom_association_input.returnPressed.connect(self.enregistrer_association)
         v.btn_ouvrir_dossier.clicked.connect(self.ouvrir_dossier)
+        v.btn_importer_base.clicked.connect(self.importer_base)
 
         # Chaque liste : (vue, ajouter, modifier, supprimer, actions)
         for vue, ajouter, modifier, supprimer, actions in (
@@ -52,7 +54,8 @@ class ParametresController:
         ex = d.exercice
         v.afficher_association(d.nom_association, QDate(ex.debut.year, ex.debut.month, ex.debut.day),
                                QDate(ex.fin.year, ex.fin.month, ex.fin.day))
-        v.label_chemin_base.setText(f"Base de données : {self.principal.chemin_base}\n"
+        v.label_chemin_base.setText(f"OdinFinance {QApplication.applicationVersion()}\n"
+                                    f"Base de données : {self.principal.chemin_base}\n"
                                     "Copiez ce fichier pour sauvegarder la trésorerie.")
 
     def _apres_modification(self, message: str):
@@ -85,6 +88,21 @@ class ParametresController:
 
     def ouvrir_dossier(self):
         QDesktopServices.openUrl(QUrl.fromLocalFile(os.path.dirname(self.principal.chemin_base)))
+
+    def importer_base(self):
+        source, _ = QFileDialog.getOpenFileName(self.vue, "Importer une base OdinFinance", "",
+                                                "Base OdinFinance (*.db);;Tous les fichiers (*)")
+        if not source or not confirmer(
+                self.vue, "Importer une base",
+                f"Remplacer les données actuelles par celles de « {os.path.basename(source)} » ?\n"
+                "Les données actuelles sont d'abord sauvegardées dans le dossier de la base.", "Importer"):
+            return
+        try:
+            sauvegarde = self.queries.db.importer(source)
+        except ErreurMetier as e:
+            signaler_erreur(self.vue, "Import impossible", str(e))
+            return
+        self._apres_modification(f"Base importée. Les données précédentes sont sauvegardées : {sauvegarde}")
 
     # --- Comptes ---
     def _compte(self):

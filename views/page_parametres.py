@@ -120,8 +120,11 @@ class PageParametres(QScrollArea):
         ligne = QHBoxLayout()
         self.btn_ouvrir_dossier = bouton("Ouvrir le dossier", None, "dossier",
                                          "Ouvrir le dossier de la base de données, pour la sauvegarder")
+        self.btn_importer_base = bouton("Importer une base…", None, None,
+                                        "Reprendre les données d'une autre installation, par exemple la version 1")
         ligne.addWidget(self.btn_ouvrir_dossier)
         ligne.addStretch()
+        ligne.addWidget(self.btn_importer_base)
         p.contenu.addLayout(ligne)
         return p
 

@@ -11,6 +11,7 @@ from database.queries import TresoQueries
 from views.main_window import MainWindow
 from views.theme import GestionnaireTheme
 
+VERSION = "2.0.0"
 NOM_BASE = "tresorerie.db"
 
 
@@ -30,7 +31,12 @@ def main():
     app = QApplication(sys.argv)
     app.setOrganizationName("OdinFinance")
     app.setApplicationName("OdinFinance")
+    app.setApplicationVersion(VERSION)
     QLocale.setDefault(QLocale(QLocale.Language.French, QLocale.Country.France))
+
+    if "--autotest" in sys.argv:
+        from verification import verifier
+        sys.exit(verifier(app))
 
     settings = QSettings()
     themes = GestionnaireTheme(app, settings)

@@ -62,6 +62,24 @@ class TestSchema(BaseTemporaire):
             self.assertEqual(conn.execute("PRAGMA foreign_key_check").fetchall(), [])
         DBManager(self.chemin)  # une seconde ouverture ne refait pas la migration
 
+    def test_import_d_une_base_v1(self):
+        ancienne = os.path.join(self.dossier.name, "v1.db")
+        with closing(sqlite3.connect(ancienne)) as conn:
+            conn.executescript(SCHEMA_V1)
+        db = DBManager(self.chemin)
+        sauvegarde = db.importer(ancienne)
+        self.assertTrue(os.path.exists(sauvegarde))
+        self.assertEqual(len(TresoQueries(db).get_toutes_operations()), 2)
+        with closing(sqlite3.connect(sauvegarde)) as conn:  # l'ancienne base 2.x reste intacte
+            self.assertEqual(conn.execute("SELECT COUNT(*) FROM comptes").fetchone()[0], 5)
+
+    def test_import_refuse_un_fichier_quelconque(self):
+        autre = os.path.join(self.dossier.name, "notes.db")
+        with open(autre, "w", encoding="utf-8") as f:
+            f.write("pas une base")
+        with self.assertRaisesRegex(ErreurMetier, "pas une base OdinFinance"):
+            DBManager(self.chemin).importer(autre)
+
 
 class TestRegles(BaseTemporaire):
     def setUp(self):
