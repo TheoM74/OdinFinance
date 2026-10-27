@@ -2,21 +2,6 @@ import os
 import shutil
 import sys
 
-# --- CORRECTION COCOA ULTRA-FORCÉE POUR MAC ---
-if sys.platform == "darwin":
-    try:
-        import PyQt6
-        pyqt_path = os.path.dirname(PyQt6.__file__)
-        platforms_dir = os.path.join(pyqt_path, "Qt6", "plugins", "platforms")
-        if not os.path.exists(platforms_dir):
-            platforms_dir = os.path.join(pyqt_path, "Qt", "plugins", "platforms")
-
-        if os.path.exists(platforms_dir):
-            os.environ["QT_QPA_PLATFORM_PLUGIN_PATH"] = platforms_dir
-    except Exception:
-        pass
-# ---------------------------------------------
-
 from PyQt6.QtCore import QLocale, QSettings, QStandardPaths
 from PyQt6.QtWidgets import QApplication
 
